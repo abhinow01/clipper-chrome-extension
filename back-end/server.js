@@ -9,8 +9,9 @@ const os = require('os');
 const app = express();
 app.use(express.json());
 app.use(cors());
+require('dotenv').config();
 
-const port = 4567;
+const port = process.env.PORT || 4567
 
 app.post('/clip', async (req, res) => {
   const { url, startTime, endTime } = req.body;
