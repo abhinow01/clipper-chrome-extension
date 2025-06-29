@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Live Wallpaper",
+  "version": "1.0",
+  "description": "Open any YouTube video in a popup window as a wallpaper",
+  "permissions": ["tabs", "windows", "scripting"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

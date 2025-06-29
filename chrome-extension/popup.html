@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Clipper Tool</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      width: 320px;
+      min-height: 400px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, 
+        rgba(255,255,255,0.1) 0%, 
+        transparent 25%, 
+        transparent 75%, 
+        rgba(255,255,255,0.1) 100%);
+      animation: shimmer 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      padding: 24px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      border-radius: 12px;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo::before {
+      content: '✂️';
+      font-size: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: logoShine 2s ease-in-out infinite;
+    }
+
+    @keyframes logoShine {
+      0%, 100% { transform: translateX(-100%) rotate(45deg); }
+      50% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, #ffffff, #e0e0e0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      opacity: 0.8;
+      font-weight: 400;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      flex: 1;
+    }
+
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      outline: none;
+    }
+
+    input::placeholder {
+      color: rgba(255,255,255,0.6);
+      font-weight: 400;
+    }
+
+    input:focus {
+      border-color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .time-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(238, 90, 36, 0.3);
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(238, 90, 36, 0.4);
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    button:disabled:hover {
+      transform: none;
+      box-shadow: 0 8px 32px rgba(238, 90, 36, 0.3);
+    }
+
+    .processing {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    .footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .bolt-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: linear-gradient(135deg, #ff9500, #ffad33);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 16px rgba(255, 149, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .bolt-badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(255, 149, 0, 0.4);
+    }
+
+    .bolt-icon {
+      width: 12px;
+      height: 12px;
+      background: white;
+      border-radius: 2px;
+      position: relative;
+    }
+
+    .bolt-icon::before {
+      content: '⚡';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 8px;
+      color: #ff9500;
+    }
+
+    .status-message {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+    }
+
+    .status-message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .status-message.success {
+      background: rgba(46, 213, 115, 0.2);
+      border: 1px solid rgba(46, 213, 115, 0.3);
+    }
+
+    .status-message.error {
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 320px) {
+      .container {
+        padding: 16px;
+      }
+      
+      .time-inputs {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo"></div>
+      <h1 class="title">YouTube Clipper</h1>
+      <p class="subtitle">Extract perfect moments</p>
+    </div>
+
+    <div class="form-group">
+      <div class="input-wrapper">
+        <label class="input-label">YouTube URL</label>
+        <input id="youtubeUrl" type="text" placeholder="https://youtube.com/watch?v=...">
+      </div>
+
+      <div class="time-inputs">
+        <div class="input-wrapper">
+          <label class="input-label">Start Time</label>
+          <input id="startTime" type="text" placeholder="0:30">
+        </div>
+        <div class="input-wrapper">
+          <label class="input-label">End Time</label>
+          <input id="endTime" type="text" placeholder="1:30">
+        </div>
+      </div>
+
+      <button id="startBtn">
+        <span id="buttonText">Clip Video</span>
+      </button>
+
+      <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <div class="footer">
+      <div class="bolt-badge">
+        <div class="bolt-icon"></div>
+        <span>Built on Bolt</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
