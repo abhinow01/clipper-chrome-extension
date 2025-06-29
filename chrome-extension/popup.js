@@ -27,7 +27,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
   button.classList.add('processing');
   buttonText.textContent = 'Processing...';
 
-fetch("http://localhost:4567/clip", {
+fetch("http://clipper-chrome-extension.railway.internal/clip", {
   method: "POST",
   headers: {
     "Content-Type": "application/json"
