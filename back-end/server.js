@@ -1,27 +1,16 @@
-// 📁 electron-app/server.js
 const express = require('express');
 const ytdl = require('@distube/ytdl-core');
 const { spawn } = require('child_process');
 const path = require('path');
 const cors = require('cors');
 const fs = require('fs');
+const os = require('os');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Serve clips folder statically
-const clipsDir = path.join(__dirname, 'clips');
-app.use('/clips', express.static(clipsDir));
-
-const port = process.env.PORT || 4567;
-// Ensure clips directory exists
-if (!fs.existsSync(clipsDir)) {
-  fs.mkdirSync(clipsDir);
-}
-app.get('/ping', (req, res) => {
-  res.send('pong');
-});
+const port = 4567;
 
 app.post('/clip', async (req, res) => {
   const { url, startTime, endTime } = req.body;
@@ -29,8 +18,6 @@ app.post('/clip', async (req, res) => {
   if (!url || startTime == null || endTime == null) {
     return res.status(400).json({ error: 'Missing URL, startTime, or endTime' });
   }
-
-  console.log(`⏱️ Clipping from ${startTime}s to ${endTime}s of: ${url}`);
 
   const toSeconds = (timeStr) => {
     const parts = timeStr.split(':').map(Number).reverse();
@@ -60,9 +47,7 @@ app.post('/clip', async (req, res) => {
       return res.status(500).json({ error: 'Could not extract video stream' });
     }
 
-    const timestamp = Date.now();
-    const filename = `clip-${timestamp}.mp4`;
-    const outputPath = path.join(clipsDir, filename);
+    const tempPath = path.join(os.tmpdir(), `clip-${Date.now()}.mp4`);
 
     const ffmpeg = spawn('ffmpeg', [
       '-ss', `${startTime}`,
@@ -72,7 +57,7 @@ app.post('/clip', async (req, res) => {
       '-preset', 'fast',
       '-crf', '23',
       '-an',
-      outputPath
+      tempPath
     ]);
 
     ffmpeg.stderr.on('data', data => {
@@ -81,12 +66,18 @@ app.post('/clip', async (req, res) => {
 
     ffmpeg.on('close', (code) => {
       if (code === 0) {
-        console.log(`✅ Clip saved: ${outputPath}`);
-        const publicURL = `http://localhost:${port}/clips/${filename}`;
-        res.json({
-          success: true,
-          file: filename,
-          url: publicURL
+        console.log(`✅ Clip ready at: ${tempPath}`);
+
+        // Stream file to browser with download trigger
+        res.setHeader('Content-Disposition', `attachment; filename="clip.mp4"`);
+        res.setHeader('Content-Type', 'video/mp4');
+
+        const readStream = fs.createReadStream(tempPath);
+        readStream.pipe(res);
+
+        // Optionally delete temp file after sending
+        readStream.on('close', () => {
+          fs.unlink(tempPath, () => {});
         });
       } else {
         console.error(`FFmpeg failed with code ${code}`);

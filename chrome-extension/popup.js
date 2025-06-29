@@ -27,65 +27,53 @@ document.getElementById('startBtn').addEventListener('click', () => {
   button.classList.add('processing');
   buttonText.textContent = 'Processing...';
 
-  fetch("http://localhost:4567/clip", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      url: url,
-      startTime: startTime,
-      endTime: endTime
-    })
+fetch("http://localhost:4567/clip", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    url: url,
+    startTime: startTime,
+    endTime: endTime
   })
-  .then(res => {
-    console.log("Response status:", res.status);
-    console.log("Response ok:", res.ok);
-    
-    if (!res.ok) {
-      throw new Error(`Server responded with status: ${res.status}`);
-    }
-    
-    return res.json();
-  })
-  .then(data => {
-    console.log("Server responded:", data);
-    
-    if (data.success) {
-      if (data.url) {
-        // Create download link
-        const a = document.createElement('a');
-        a.href = data.url;
-        a.download = data.filename || 'clip.mp4';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        showStatus("Clip downloaded successfully!", 'success');
-      } else if (data.message) {
-        showStatus(data.message, 'success');
-      } else {
-        showStatus("Clip created successfully!", 'success');
-      }
-    } else {
-      showStatus(data.error || "Failed to create clip", 'error');
-    }
-    
-    resetButton();
-  })
-  .catch(err => {
-    console.error("Failed to contact server:", err);
-    
-    // More specific error messages
-    if (err.name === 'TypeError' && err.message.includes('fetch')) {
-      showStatus("Could not connect to clipper engine. Is the app running?", 'error');
-    } else if (err.message.includes('status:')) {
-      showStatus(`Server error: ${err.message}`, 'error');
-    } else {
-      showStatus("An unexpected error occurred. Please try again.", 'error');
-    }
-    
-    resetButton();
-  });
+})
+.then(res => {
+  console.log("Response status:", res.status);
+  console.log("Response ok:", res.ok);
+
+  if (!res.ok) {
+    throw new Error(`Server responded with status: ${res.status}`);
+  }
+
+  return res.blob(); // <-- response is a binary video, not JSON
+})
+.then(blob => {
+  const downloadUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = 'clip.mp4';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(downloadUrl);
+
+  showStatus("Clip downloaded successfully!", 'success');
+  resetButton();
+})
+.catch(err => {
+  console.error("Clip download error:", err);
+
+  if (err.name === 'TypeError' && err.message.includes('fetch')) {
+    showStatus("Could not connect to clipper engine. Is the app running?", 'error');
+  } else if (err.message.includes('status:')) {
+    showStatus(`Server error: ${err.message}`, 'error');
+  } else {
+    showStatus("An unexpected error occurred. Please try again.", 'error');
+  }
+
+  resetButton();
+});
 
   function resetButton() {
     setTimeout(() => {
