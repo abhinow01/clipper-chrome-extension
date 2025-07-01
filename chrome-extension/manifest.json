@@ -3,7 +3,7 @@
   "name": "YouTube Live Wallpaper",
   "version": "1.0",
   "description": "Open any YouTube video in a popup window as a wallpaper",
-  "permissions": ["tabs", "windows", "scripting"],
+  "permissions": ["tabs", "windows", "scripting", "downloads"],
   "action": {
     "default_popup": "popup.html"
   },

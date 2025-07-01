@@ -27,7 +27,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
   button.classList.add('processing');
   buttonText.textContent = 'Processing...';
 
-fetch("http://clipper-chrome-extension.railway.internal/clip", {
+fetch("http://localhost:4567/clip", {
   method: "POST",
   headers: {
     "Content-Type": "application/json"
@@ -140,3 +140,29 @@ document.addEventListener('keydown', function(event) {
     document.getElementById('startBtn').click();
   }
 });
+
+document.getElementById('downloadBackendBtn').addEventListener("click" , ()=>{
+  const platform = navigator.platform.toLowerCase();
+  let backendUrl ='';
+  if(platform.includes('win')){
+    backendUrl = 'https://yourdomain.com/executables/backend-windows.exe';
+  }else if (platform.includes('mac')){
+    backendUrl = 'https://yourdomain.com/executables/backend-macos'
+  }else if(platform.includes('linux')) {
+    backendUrl = 'https://yourdomain.com/executables/backend-linux';
+  }else {
+    showStatus("Unsupported OS. Please check GitHub releases.", 'error');
+    return;
+  }
+  chrome.downloads.download({
+    url: backendUrl,
+    filename: backendUrl.split('/').pop(),
+    saveAs: true
+  }, (downloadId) => {
+    if (downloadId) {
+      showStatus("Download started. Run the file to enable clipping.", 'success');
+    } else {
+      showStatus("Failed to download. Try again.", 'error');
+    }
+  });
+})
