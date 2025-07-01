@@ -145,11 +145,11 @@ document.getElementById('downloadBackendBtn').addEventListener("click" , ()=>{
   const platform = navigator.platform.toLowerCase();
   let backendUrl ='';
   if(platform.includes('win')){
-    backendUrl = 'https://yourdomain.com/executables/backend-windows.exe';
+    backendUrl = 'https://github.com/abhinow01/clipper-chrome-extension/releases/download/v1.0.0/youtube-clipper-backend-win.exe';
   }else if (platform.includes('mac')){
-    backendUrl = 'https://yourdomain.com/executables/backend-macos'
+    backendUrl = 'https://github.com/abhinow01/clipper-chrome-extension/releases/download/v1.0.0/youtube-clipper-backend-macos'
   }else if(platform.includes('linux')) {
-    backendUrl = 'https://yourdomain.com/executables/backend-linux';
+    backendUrl = 'https://github.com/abhinow01/clipper-chrome-extension/releases/download/v1.0.0/youtube-clipper-backend-linux';
   }else {
     showStatus("Unsupported OS. Please check GitHub releases.", 'error');
     return;
